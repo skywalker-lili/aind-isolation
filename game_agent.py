@@ -197,14 +197,15 @@ class CustomPlayer:
 
         # TODO: finish this function!
         possible_moves = game.get_legal_moves()
+        print("Initial possible moves are:{}".format(possible_moves))
         
         if maximizing_player:
-            value, move_id = self.max_value(game, 1, depth)
-            return value, possible_moves[move_id]
+            value, move = self.max_value(game, 1, depth)
+            return value, move
             
         else:
-            value, move_id = self.min_value(game, 1, depth)
-            return value, possible_moves[move_id]
+            value, move = self.min_value(game, 1, depth)
+            return value, move
         # raise NotImplementedError
     
     def terminate_minimax(self, game, current_depth, max_depth, maximizing_player=True):
@@ -289,7 +290,7 @@ class CustomPlayer:
                    max_val = attempt_max
                    max_move_id = id
            # print("Max move decided: {} with value of {}".format(possible_moves[max_move_id], max_val))
-           return max_val, max_move_id
+           return max_val, possible_moves[max_move_id]
     
     def min_value(self, game, current_depth, max_depth):
         """
@@ -332,7 +333,7 @@ class CustomPlayer:
                     min_val = attempt_min
                     min_move_id = id
             
-            return min_val, min_move_id
+            return min_val, possible_moves[min_move_id]
     
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
