@@ -365,7 +365,7 @@ class Project1Test(unittest.TestCase):
                        "on the current game board."))
 
     @timeout(TIMEOUT)
-    # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
+    @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """Test CustomPlayer.minimax
 
@@ -408,7 +408,7 @@ class Project1Test(unittest.TestCase):
         # evaluation function.
         for idx in range(5):
             test_depth = idx + 1
-            print("test depth is", str(test_depth))
+            # print("test depth is", str(test_depth))
             agentUT, board = self.initAUT(test_depth, heuristic,
                                           iterative_search, method,
                                           loc1=starting_location,
@@ -431,7 +431,7 @@ class Project1Test(unittest.TestCase):
                 method, test_depth, expected_moves[idx // 2], move))
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip alpha-beta test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip alpha-beta test.")  # Uncomment this line to skip test
     def test_alphabeta(self):
         """Test CustomPlayer.alphabeta
 
@@ -460,6 +460,8 @@ class Project1Test(unittest.TestCase):
 
         for idx in range(len(counts)):
             test_depth = idx + 1  # pruning guarantee requires min depth of 3
+            print("Test depth is {}, with explored nodes counts of {}"
+                  .format(test_depth, counts[idx]))
             first_branch = []
             heuristic = makeBranchEval(first_branch)
             agentUT, board = self.initAUT(test_depth, heuristic,
