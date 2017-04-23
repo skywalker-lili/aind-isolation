@@ -267,12 +267,13 @@ class CustomPlayer:
         float :
             maximum value of the given board
         
-        int :
-            index of the move that maximize the value in possible legal moves; intialized as -1
+        int tuple :
+            move that minimize the value in possible legal moves; 
+            if no legal move, return (-1, -1)
         """
         
         if self.terminate_minimax(game, current_depth, max_depth):
-            return self.score(game, self), -1
+            return self.score(game, self), (-1, -1)
         
         else:
            max_val = float("-inf")
@@ -313,12 +314,13 @@ class CustomPlayer:
         float :
             the minimum value of the given board
         
-        int :
-            index of the move that minimize the value in possible legal moves; intialized as -1
+        int tuple :
+            move that minimize the value in possible legal moves; 
+            if no legal move, return (-1, -1)
         """
         
         if self.terminate_minimax(game, current_depth, max_depth):
-            return self.score(game, self), -1
+            return self.score(game, self), (-1, -1)
         
         else:
             min_val = float("inf")
@@ -381,12 +383,12 @@ class CustomPlayer:
         alpha_beta = {"alpha": float("-inf"), "beta": float("inf")}
         
         if maximizing_player:
-            value, move_id = self.max_value_ab(game, 1, depth, alpha_beta)
-            return value, possible_moves[move_id]
+            value, move = self.max_value_ab(game, 1, depth, alpha_beta)
+            return value, move
             
         else:
             value, move_id = self.min_value_ab(game, 1, depth, alpha_beta)
-            return value, possible_moves[move_id]
+            return value, move
         # raise NotImplementedError
     
     def max_value_ab(self, game, current_depth, max_depth,\
@@ -413,12 +415,13 @@ class CustomPlayer:
         float :
             maximum value of the given board
         
-        int :
-            index of the move that maximize the value in possible legal moves; intialized as -1
+        int tuple :
+            move that minimize the value in possible legal moves; 
+            if no legal move, return (-1, -1)
         """
         
         if self.terminate_minimax(game, current_depth, max_depth):
-           return self.score(game, self), -1
+           return self.score(game, self), (-1, -1)
         
         else:
            max_val = float("-inf")
@@ -439,7 +442,7 @@ class CustomPlayer:
                    alpha_beta["alpha"] = max(alpha_beta["alpha"], max_val)
                       
            
-           return max_val, max_move_id
+           return max_val, possible_moves[max_move_id]
     
     def min_value_ab(self, game, current_depth, max_depth,\
                     alpha_beta={"alpha": float("-inf"), "beta": float("inf")}):
@@ -465,8 +468,9 @@ class CustomPlayer:
         float :
             minimum value of the given board
         
-        int :
-            index of the move that minimize the value in possible legal moves; intialized as -1
+        int tuple :
+            index of the move that minimize the value in possible legal moves; 
+            if no legal move, return (-1, -1)
         """
         
         if self.terminate_minimax(game, current_depth, max_depth):
@@ -490,4 +494,4 @@ class CustomPlayer:
                        return min_val, min_move_id
                    alpha_beta["beta"] = min(alpha_beta["beta"], min_val)
                       
-           return min_val, min_move_id
+           return min_val, possible_moves[min_move_id]
