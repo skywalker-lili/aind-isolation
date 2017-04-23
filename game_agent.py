@@ -7,6 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+import sys
 
 
 class Timeout(Exception):
@@ -104,7 +105,8 @@ class CustomPlayer:
             game (e.g., player locations and blocked cells).
 
         legal_moves : list<(int, int)>
-            DEPRECATED -- This argument will be removed in the next release
+            A list containing legal moves. Moves are encoded as tuples of pairs
+            of ints defining the next (row, col) for the agent to occupy.
 
         time_left : callable
             A function that returns the number of milliseconds left in the
@@ -112,7 +114,7 @@ class CustomPlayer:
             the game.
 
         Returns
-        -------
+        ----------
         (int, int)
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
@@ -121,44 +123,49 @@ class CustomPlayer:
         self.time_left = time_left
 
         # TODO: finish this function!
-
+        best_score = float('-inf')
+        
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
+        if not legal_moves:
+            return (-1,-1)
+        best_move = legal_moves[0]
         
-        if len(legal_moves) == 0:
-            return (-1, -1)
-        
-        best_move = legal_moves[0] # default use first legal move as the best move
-            
+        if game.move_count < 1:   # opening book
+            x, y = random.randint(0, game.width), random.randint(0, game.height)
+            return (x, y)
+
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            
-            # TODO: finish this function!
-            
-            if self.method == "minimax":
-                best_score, best_move = self.minimax(game, self.search_depth, 
-                                                     maximizing_player=True)
-                return best_move
-            
-            elif self.method == "alphabeta":
-                best_socre, best_move = self.alphabeta(
-                    game, self.search_depth, maximizing_player=True,
-                    alpha=float("-inf"), beta=float("inf"))
-                return best_move
-            
+            if self.iterative:
+                for i in range (1, sys.maxsize):
+                    if self.method == 'alphabeta':
+                        if self.time_left() < self.TIMER_THRESHOLD:
+                            raise Timeout()
+                        score, move = self.alphabeta(game, i)
+                        if score > best_score:
+                            best_score = score
+                            best_move = move
+                    else:
+                        if self.time_left() < self.TIMER_THRESHOLD:
+                            raise Timeout()
+                        score, move = self.minimax(game, i)
+                        if score > best_score:
+                            best_score = score
+                            best_move = move            
             else:
-                raise Exception("Method:{}, isn't valid. Only 'minimax' or 'alphabeta' is valid."
-                                .format(self.method))
-
+                if self.method == 'minimax':
+                    best_score, best_move = self.minimax(game, self.search_depth)
+                else:
+                    best_score, best_move = self.alphabeta(game, self.search_depth)
+                     
         except Timeout:
-            # Handle any actions required at timeout, if necessary
-            return best_move # return the best move before time out
+            return best_move
 
-        # Return the best move from the last completed search iteration
         return best_move
 
     def minimax(self, game, depth, maximizing_player=True):
@@ -179,163 +186,45 @@ class CustomPlayer:
             maximizing layer (True) or a minimizing layer (False)
 
         Returns
-        -------
+        ----------
         float
             The score for the current search branch
 
         tuple(int, int)
             The best move for the current branch; (-1, -1) for no legal moves
-
-        Notes
-        -----
-            (1) You MUST use the `self.score()` method for board evaluation
-                to pass the project unit tests; you cannot call any other
-                evaluation function directly.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
+            
+        legal_moves = game.get_legal_moves(game.active_player)
+        best_score = float('-inf')
+        best_move = (-1, -1)
+        
+        if not maximizing_player:
+            best_score = float('inf')
+            
+        if not legal_moves:
+            return self.score(game, self), best_move
+        
+        if depth == 0:
+            return self.score(game, self), legal_moves[0]
+        else:
+            for move in legal_moves:
+                if self.time_left() < self.TIMER_THRESHOLD:
+                    raise Timeout()
+                    
+                clone = game.forecast_move(move)
+                score, _ = self.minimax(clone, depth-1, not maximizing_player)
+                if maximizing_player:
+                    if score > best_score:
+                        best_score = score
+                        best_move = move
+                else:
+                    if score < best_score:
+                        best_score = score
+                        best_move = move
 
-        # TODO: finish this function!
-        possible_moves = game.get_legal_moves()
-        print("Initial possible moves are:{}".format(possible_moves))
-        
-        if maximizing_player:
-            value, move = self.max_value(game, 1, depth)
-            return value, move
-            
-        else:
-            value, move = self.min_value(game, 1, depth)
-            return value, move
-        # raise NotImplementedError
-    
-    def terminate_minimax(self, game, current_depth, max_depth, maximizing_player=True):
-        """
-        Determine whether minimax search should stop
-        
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-        current_depth : int
-            An integer indicating the current number of plies to search in the game tree
-        
-        max_depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-        maximizing_player : bool
-            Flag indicating whether the current search depth corresponds to a
-            maximizing layer (True) or a minimizing layer (False)
-            
-        Returns
-        -------
-        boolean :
-            Whether should stop the minimax search
-        """
-        
-        # Situation 1: current depth is deeper than maximeum depth
-        if current_depth > max_depth:
-            # print("This game reaches max depth:{}!".format(max_depth))
-            return True
-        
-        # Situation 2: there is no legal moves for active player to perform
-        if len(game.get_legal_moves()) == 0:
-            # print("This game has to end since no legal move for {}!"
-            #       .format(game.active_player))
-            return True
-        
-        return False  # otherwise should return False to continue the search
-    
-    def max_value(self, game, current_depth, max_depth):
-        """
-        Find the maximum value given the game board
-        
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-        current_depth : int
-            An integer indicating the current number of plies to search in the game tree
-        
-        max_depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-                   
-        Returns
-        -------
-        float :
-            maximum value of the given board
-        
-        int tuple :
-            move that minimize the value in possible legal moves; 
-            if no legal move, return (-1, -1)
-        """
-        
-        if self.terminate_minimax(game, current_depth, max_depth):
-            return self.score(game, self), (-1, -1)
-        
-        else:
-           max_val = float("-inf")
-           max_move_id = -1
-           possible_moves = game.get_legal_moves()
-           # print("possible_moves are {}".format(possible_moves))
-           
-           # Iterate through all possible moves and find maximum one
-           for id, move in enumerate(possible_moves):
-               attempt_board = game.forecast_move(move)
-               attempt_max, _ = self.min_value(attempt_board, current_depth+1, max_depth)
-               # print("Trying move {}, its score is {}".format(move, attempt_max))
-               if attempt_max > max_val:
-                   # print("Move {} has score:{}, larger than current:{}".format(move, attempt_max, max_val))
-                   max_val = attempt_max
-                   max_move_id = id
-           # print("Max move decided: {} with value of {}".format(possible_moves[max_move_id], max_val))
-           return max_val, possible_moves[max_move_id]
-    
-    def min_value(self, game, current_depth, max_depth):
-        """
-        Find the minimum value given the game board
-        
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-        current_depth : int
-            An integer indicating the current number of plies to search in the game tree
-        
-        max_depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-   
-        Returns
-        -------
-        float :
-            the minimum value of the given board
-        
-        int tuple :
-            move that minimize the value in possible legal moves; 
-            if no legal move, return (-1, -1)
-        """
-        
-        if self.terminate_minimax(game, current_depth, max_depth):
-            return self.score(game, self), (-1, -1)
-        
-        else:
-            min_val = float("inf")
-            min_move_id = -1
-            possible_moves = game.get_legal_moves()
-            
-            # Iterate through all possible moves to find the minimum one
-            for id, move in enumerate(possible_moves):
-                attempt_board = game.forecast_move(move)
-                attempt_min, _ = self.max_value(attempt_board, current_depth+1, max_depth)
-                if attempt_min < min_val:
-                    min_val = attempt_min
-                    min_move_id = id
-            
-            return min_val, possible_moves[min_move_id]
+        return (best_score, best_move)
     
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
@@ -362,136 +251,50 @@ class CustomPlayer:
             maximizing layer (True) or a minimizing layer (False)
 
         Returns
-        -------
+        ----------
         float
             The score for the current search branch
 
         tuple(int, int)
             The best move for the current branch; (-1, -1) for no legal moves
-
-        Notes
-        -----
-            (1) You MUST use the `self.score()` method for board evaluation
-                to pass the project unit tests; you cannot call any other
-                evaluation function directly.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() <= self.TIMER_THRESHOLD:
             raise Timeout()
-
-        # TODO: finish this function!
-        possible_moves = game.get_legal_moves()
-        alpha_beta = {"alpha": float("-inf"), "beta": float("inf")}
-        
-        if maximizing_player:
-            value, move = self.max_value_ab(game, 1, depth, alpha_beta)
-            return value, move
             
+        legal_moves = game.get_legal_moves(game.active_player)
+        best_score = float('-inf')
+
+        if not maximizing_player:
+            best_score = float('inf')
+
+        if not legal_moves:
+            return self.score(game, self), (-1, -1)
+        best_move = legal_moves[0]
+        
+        if depth == 0:
+            return self.score(game, self), best_move
+
         else:
-            value, move_id = self.min_value_ab(game, 1, depth, alpha_beta)
-            return value, move
-        # raise NotImplementedError
-    
-    def max_value_ab(self, game, current_depth, max_depth,\
-                     alpha_beta={"alpha": float("-inf"), "beta": float("inf")}):
-        """
-        Find the maximum value given the game board using alpha-beta pruning
-        
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-        current_depth : int
-            An integer indicating the current number of plies to search in the game tree
-        max_depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-        alpha_beta : dict(string:float)
-            alpha and beta value stored in the dictionary to allow recursive call to modify them.
-            two keys: "alpha" and "beta".
-        
-        Returns
-        -------
-        float :
-            maximum value of the given board
-        
-        int tuple :
-            move that minimize the value in possible legal moves; 
-            if no legal move, return (-1, -1)
-        """
-        
-        if self.terminate_minimax(game, current_depth, max_depth):
-           return self.score(game, self), (-1, -1)
-        
-        else:
-           max_val = float("-inf")
-           max_move_id = -1
-           possible_moves = game.get_legal_moves()
-           
-           # Iterate through all possible moves and find maximum one
-           for id, move in enumerate(possible_moves):
-               attempt_board = game.forecast_move(move)
-               attempt_max, _ = self.min_value_ab(attempt_board, current_depth+1, max_depth, alpha_beta)
-               if attempt_max > max_val:
-                   max_val = attempt_max
-                   max_move_id = id
-                   
-                   # Only difference with simple minimax: compare with current beta and update alpha
-                   if max_val > alpha_beta["beta"]:
-                       return max_val, max_move_id
-                   alpha_beta["alpha"] = max(alpha_beta["alpha"], max_val)
-                      
-           
-           return max_val, possible_moves[max_move_id]
-    
-    def min_value_ab(self, game, current_depth, max_depth,\
-                    alpha_beta={"alpha": float("-inf"), "beta": float("inf")}):
-        """
-        Find the minimum value given the game board using alpha-beta pruning
-        
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-        current_depth : int
-            An integer indicating the current number of plies to search in the game tree
-        max_depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-        alpha_beta : dict(string:float)
-            alpha and beta value stored in the dictionary to allow recursive call to modify them.
-            two keys: "alpha" and "beta".
-        
-        Returns
-        -------
-        float :
-            minimum value of the given board
-        
-        int tuple :
-            index of the move that minimize the value in possible legal moves; 
-            if no legal move, return (-1, -1)
-        """
-        
-        if self.terminate_minimax(game, current_depth, max_depth):
-           return self.score(game, self), -1
-        
-        else:
-           min_val = float("inf")
-           min_move_id = -1
-           possible_moves = game.get_legal_moves()
-           
-           # Iterate through all possible moves and find minimum one
-           for id, move in enumerate(possible_moves):
-               attempt_board = game.forecast_move(move)
-               attempt_min, _ = self.max_value_ab(attempt_board, current_depth+1, max_depth, alpha_beta)
-               if attempt_min < min_val:
-                   min_val = attempt_min
-                   min_move_id = id
-                   
-                   # Only difference with simple minimax: compare with current alpha and update beta
-                   if min_val < alpha_beta["alpha"]:
-                       return min_val, min_move_id
-                   alpha_beta["beta"] = min(alpha_beta["beta"], min_val)
-                      
-           return min_val, possible_moves[min_move_id]
+            for move in legal_moves:
+                if self.time_left() <= self.TIMER_THRESHOLD:
+                    raise Timeout()
+                    
+                clone = game.forecast_move(move)
+                score, _ = self.alphabeta(clone, depth-1, alpha, beta, not maximizing_player)
+
+                if maximizing_player:
+                    if score > best_score:
+                        best_score = score
+                        best_move = move
+                    if score >= beta:
+                        return score, move
+                    alpha = max(alpha, score)
+                else:
+                    if score < best_score:
+                        best_score = score
+                        best_move = move
+                    if score <= alpha:
+                        return score, move
+                    beta = min(beta, score)
+                    
+        return best_score, best_move

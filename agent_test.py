@@ -236,7 +236,7 @@ class Project1Test(unittest.TestCase):
         return agentUT, board
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip eval function test.")  # Uncomment this line to skip test
     def test_heuristic(self):
         """Test output interface of heuristic score function interface."""
         player1 = "Player1"
@@ -251,7 +251,7 @@ class Project1Test(unittest.TestCase):
             "The heuristic function should return a floating point")
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip simple minimax test.")  # Uncomment this line to skip test
     def test_minimax_interface(self):
         """Test CustomPlayer.minimax interface with simple input """
         h, w = 7, 7  # board size
@@ -282,7 +282,7 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip alphabeta test.")  # Uncomment this line to skip test
     def test_alphabeta_interface(self):
         """Test CustomPlayer.alphabeta interface with simple input """
         h, w = 9, 9  # board size
@@ -313,7 +313,7 @@ class Project1Test(unittest.TestCase):
                              "branch being searched."))
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip get_move test.")  # Uncomment this line to skip test
     def test_get_move_interface(self):
         """Test CustomPlayer.get_move interface with simple input """
         h, w = 9, 9  # board size
@@ -365,7 +365,7 @@ class Project1Test(unittest.TestCase):
                        "on the current game board."))
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip minimax test.")  # Uncomment this line to skip test
     def test_minimax(self):
         """Test CustomPlayer.minimax
 
@@ -487,7 +487,7 @@ class Project1Test(unittest.TestCase):
                 method, test_depth, first_branch, move))
 
     @timeout(TIMEOUT)
-    @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
+    # @unittest.skip("Skip iterative deepening test.")  # Uncomment this line to skip test
     def test_get_move(self):
         """Test iterative deepening in CustomPlayer.get_move
 
