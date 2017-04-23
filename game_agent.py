@@ -9,41 +9,73 @@ relative strength using tournament.py and include the results in your report.
 import random
 import sys
 
-
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
 
-def custom_score(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
+def custom_score_3(game, player):
     """
-
-    # TODO: finish this function!
-    
-    # Heuristic function 1: # of available moves
+    Results: 42.86%
+    ----------
+    Discussion:
+    This scoring function just blindly evalue the number of possible legal moves left as if
+    the player can make move immediately insteading of waiting for the opponent to finish.
+    So it doesn't consider locations, nor the future board after opponenet's move.
+    It's actually surpiringly win the MM_Improved by 11 to 9.
+    """
     return float(len(game.get_legal_moves(player)))
+    
+def custom_score(game, player):
+    """
+    Results: 85.00%
+    ----------
+    Discussion:
+    Borrowing from the improved score from lecture, I heavily weighted the number of opponent
+    moves left in the game by multiplying by 100.
+    """
+    if game.is_winner(player):
+        return float('inf')
+    elif game.is_loser(player):
+        return float('-inf')
+    else:
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves - 3*opp_moves)
 
+def custom_score_2(game, player):
+    """
+    Results: 76.43%
+    ----------            
+    Discussion:
+    This heuristic was an attempt to weight the number of moves left to the player with their
+    respective position on the board. By multiplying by the absolute value of the difference
+    between their x and y positions and the total width of the board, I am penalizing positions
+    in the center of the board and rewarding positions closer to the edges. I am also using the 
+    100 weight from custom_score. Weighting the position on the board resulted in an over 6%
+    increase over custom_score.
+    """
+    if game.is_winner(player):
+        return float('inf')
+    elif game.is_loser(player):
+        return float('-inf')
+    else:
+        width = game.width/2
+        position = game.get_player_location(player)
+        opp_position = game.get_player_location(game.get_opponent(player))
 
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        
+        position_width_weight = abs(width - position[0])
+        position_height_weight = abs(width - position[1])
+        
+        opp_position_width_weight = abs(width - opp_position[0])
+        opp_position_width_height = abs(width - opp_position[1])
+        
+        return float((own_moves + position_width_weight + position_height_weight) - 100*((opp_moves + opp_position_width_weight + opp_position_width_height)))   
+ 
+ 
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
     and a depth-limited minimax algorithm with alpha-beta pruning. You must
