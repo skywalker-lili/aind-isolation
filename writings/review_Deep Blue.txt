@@ -1,0 +1,12 @@
+The paper reviews Deep Blue's improvements on its large search ability, comlicated evaulation function and a special designed search algorithm.
+  
+Deep Blue's search ability is enhanced by many factors. The paper hightlights following points: 
+1. hardware support on search, evaluation and move generation: there are special chess chip designed to generator moves in a best-first order (as much as possible), to evaulate the board and to search the game tree. They combine to allow Deep Blue to search a full-width depth of 12.2 on average in a 3-min search.   
+2. parallel search: Deep Blue can run search in parallel on its 30-node computer and 480 chess chip in some situation. Although no hard evidence, it's interpolated that the efficiency of parallel search is about 8% (I don't know what doesn that mean in the paper but that's the result they provide)  
+3. Opening book and endgame data base. Deep Blue has hardward storage of opening book and engame database to refer to when doing the search. They are not often used. For endgame data base, only game 4 VS Kasparov used it.
+  
+Deep Blue's evaluation function in essence is a some of scores of patterns. Its chess chip can recognize about 8000 patterns. The score for each pattern can be fixed or dynamic according to the search. Those patterns ranges from simple ones to complicated ones that encodes human knowledge as well. In total, about 8150 features are used in the evaluation function.
+  
+Deep Blue also has its own improved version of alpha-beta negamax formulation, called "dual credit with delayed extension" (DC). The feature of DC is based on observations of some principles on forced pairs of moves, and how to avoid search exploding. It's un-uniformed, meaning can choose some game tree branch to explore more. It does this by keeping a concept of "credit", which roughly means how good one's moves so far is. The realy credit that influences the choice on how deep to go in a search tree is relative, depending on the relative value of opponents and players. This algorithm allows Deep Blue to do deep search on promising branches while avoiding search exploding.
+  
+Other techniques Deep Blues faces include time control, avoiding oscillating searches and keeping search envelop in search, load balancing and sharing knowledge between nodes in parallel and keep extension ability in hardward design, and many other points.
