@@ -1,0 +1,25 @@
+Since the visulization doesn't work and time is very very limited due to deadlines of term I, I justed tried 3 strategy and here are the results. You can better understand them if looking at the code. Don't worry, I add those analysis as comments on the customized_score() functions.
+
+Strategy: all opponent's legal moves are equal
+Results: 42.86%
+    ----------
+    Discussion:
+    This scoring function just blindly evalue the number of possible legal moves left as if
+    the player can make move immediately insteading of waiting for the opponent to finish.
+    So it doesn't consider locations, nor the future board after opponenet's move.
+    It's actually surpiringly win the MM_Improved by 11 to 9
+
+Strategy: Copy-and-paste   
+Results: 85.00%
+    ----------
+    Discussion:
+    Borrowing from the improved score from lecture. This works I guess because it includes both legal moves for me and for opponents.
+
+Strategy: Edges are more important
+Results: 76.43%
+    ----------            
+    Discussion:
+    This heuristic was an attempt to weight the number of moves left to the player with their
+    respective position on the board. By multiplying by the absolute value of the difference
+    between their x and y positions and the total width of the board, I am penalizing positions
+    in the center of the board and rewarding positions closer to the edges.

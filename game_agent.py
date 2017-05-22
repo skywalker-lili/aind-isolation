@@ -31,8 +31,7 @@ def custom_score(game, player):
     Results: 85.00%
     ----------
     Discussion:
-    Borrowing from the improved score from lecture, I heavily weighted the number of opponent
-    moves left in the game by multiplying by 100.
+    Borrowing from the improved score from lecture.
     """
     if game.is_winner(player):
         return float('inf')
@@ -51,9 +50,7 @@ def custom_score_2(game, player):
     This heuristic was an attempt to weight the number of moves left to the player with their
     respective position on the board. By multiplying by the absolute value of the difference
     between their x and y positions and the total width of the board, I am penalizing positions
-    in the center of the board and rewarding positions closer to the edges. I am also using the 
-    100 weight from custom_score. Weighting the position on the board resulted in an over 6%
-    increase over custom_score.
+    in the center of the board and rewarding positions closer to the edges.
     """
     if game.is_winner(player):
         return float('inf')
@@ -165,8 +162,9 @@ class CustomPlayer:
         best_move = legal_moves[0]
         
         if game.move_count < 1:   # opening book
-            x, y = random.randint(0, game.width), random.randint(0, game.height)
-            return (x, y)
+            opening_book = [(2, 2), (game.width-3, 2), (4, 2), (2, game.width-3), (game.width-3, game.width-3), (game.width-2, game.width-3), (2, game.width-2), (game.width-3, game.width-2), (game.width-2, game.width-2)]
+            
+            return opening_book[random.randint(0, len(opening_book)-1)]
 
         try:
             # The search method call (alpha beta or minimax) should happen in

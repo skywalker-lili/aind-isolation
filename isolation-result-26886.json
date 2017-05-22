@@ -1,0 +1,12 @@
+{
+    "critiques": {
+        "680": {
+            "rubric_items": {
+                "5510": {
+                    "result": "failed",
+                    "observation": "{\n    \"-1. Test imports & calls\": {\n        \"traceback\": \"AssertionError: You may not import any additional modules. Remove the import statements for the following module(s): sys\\n\"\n    }\n}"
+                }
+            }
+        }
+    }
+}
